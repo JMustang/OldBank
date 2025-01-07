@@ -1,1 +1,3 @@
 # OldBank
+
+![Go](GoLogo.jpg)
