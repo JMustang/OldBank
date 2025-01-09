@@ -11,4 +11,7 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://docker:docker@localhost:5433/OldBank?sslmode=disable" -verbose down
 
-.PHONY: postgres createdb dropdb migrateup migratedown
+sqlc:
+	sqlc generate
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc
