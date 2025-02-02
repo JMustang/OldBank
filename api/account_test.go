@@ -19,26 +19,51 @@ import (
 func TestGetAccountAPI(t *testing.T) {
 	account := randomAccount()
 
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	testCases := []struct {
+		name          string
+		accountID     int64
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:      "OK",
+			accountID: account.ID,
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+					Times(1).
+					Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchAccount(t, recorder.Body, account)
+			},
+		},
+		// TODO: add more cases
+	}
 
-	store := mockdb.NewMockStore(ctrl)
-	store.EXPECT().
-		GetAccount(gomock.Any(), gomock.Eq(account.ID)).
-		Times(1).
-		Return(account, nil)
+	for i := range testCases {
+		tc := testCases[i]
 
-	server := NewServer(store)
-	recorder := httptest.NewRecorder()
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-	url := fmt.Sprintf("/accounts/%d", account.ID)
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
 
-	server.router.ServeHTTP(recorder, request)
+			server := NewServer(store)
+			recorder := httptest.NewRecorder()
 
-	require.Equal(t, http.StatusOK, recorder.Code)
-	requireBodyMatchAccount(t, recorder.Body, account)
+			url := fmt.Sprintf("/accounts/%d", account.ID)
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			server.router.ServeHTTP(recorder, request)
+			tc.checkResponse(t, recorder)
+
+		})
+	}
 }
 
 func randomAccount() db.Account {
