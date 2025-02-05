@@ -23,6 +23,13 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		return
 	}
 
+	if !server.validAccount(ctx, req.FromAccountID, req.Currency) {
+		return
+	}
+	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
+		return
+	}
+
 	arg := db.TransferTxParams{
 		FromAccountID: req.FromAccountID,
 		ToAccountID:   req.ToAccountID,
