@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -72,7 +73,7 @@ func RandomAccount() TestAccount {
 
 // RandomEmail generates a random email for testing
 func RandomEmail() string {
-	return RandomString(6) + "@test.com"
+	return fmt.Sprintf("%s@email.com", RandomString(6))
 }
 
 // RandomPositiveMoney generates a random positive amount
