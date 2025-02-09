@@ -17,8 +17,10 @@ type TestAccount struct {
 }
 
 func createRandomAccount(t *testing.T) TestAccount {
+	user := createRandomUser(t)
+
 	arg := CreateAccountParams{
-		Owner:    util.RandomOwner(),
+		Owner:    user.Username,
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
@@ -89,21 +91,31 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-	var createdAccounts []Account
-	targetOwner := util.RandomOwner()
+	user := createRandomUser(t)
 
-	// Criar 10 contas com o mesmo owner
+	var createdAccounts []Account
+	targetOwner := user.Username
+
+	// Lista de moedas únicas para garantir que não haja duplicatas
+	currencies := []string{
+		"USD", "EUR", "GBP", "JPY", "CAD",
+		"AUD", "CHF", "CNY", "SEK", "NZD", // 10 moedas diferentes
+	}
+
+	// Criar 10 contas com o mesmo owner e moedas únicas
 	for i := 0; i < 10; i++ {
 		arg := CreateAccountParams{
 			Owner:    targetOwner,
 			Balance:  util.RandomMoney(),
-			Currency: util.RandomCurrency(),
+			Currency: currencies[i], // Usa a moeda correspondente ao índice
 		}
 
 		account, err := testQueries.CreateAccount(context.Background(), arg)
 		require.NoError(t, err)
 		createdAccounts = append(createdAccounts, account)
 	}
+
+	// ... restante do teste permanece igual ...
 
 	// Testar diferentes combinações de limit e offset
 	testCases := []struct {
