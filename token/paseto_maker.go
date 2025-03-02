@@ -1,0 +1,29 @@
+package token
+
+import (
+	"fmt"
+
+	"github.com/aead/chacha20poly1305"
+	"github.com/o1egl/paseto"
+)
+
+// PasetoMaker is a PASETO token maker
+type PasetoMaker struct {
+	paseto       *paseto.V2
+	symmetricKey []byte
+}
+
+// NewPasetoMaker constructs a new PasetoMaker with the required symmetric key
+func NewPasetoMaker(symmetricKey string) (Maker, error) {
+	if len(symmetricKey) != chacha20poly1305.KeySize {
+		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
+	}
+
+	maker := &PasetoMaker{
+		paseto:       paseto.NewV2(),
+		symmetricKey: []byte(symmetricKey),
+	}
+	return maker, nil
+}
+
+// CreateToken creates a new Paseto token with the subject and duration in the payload
