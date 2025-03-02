@@ -2,6 +2,7 @@ package token
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aead/chacha20poly1305"
 	"github.com/o1egl/paseto"
@@ -27,3 +28,11 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 }
 
 // CreateToken creates a new Paseto token with the subject and duration in the payload
+func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+	Payload, err := NewPayload(username, duration)
+	if err != nil {
+		return "", err
+	}
+
+	return maker.paseto.Encrypt(maker.symmetricKey, Payload, nil)
+}
