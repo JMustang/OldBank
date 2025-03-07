@@ -25,6 +25,16 @@ type userResponse struct {
 	CreatedAt         time.Time `json:"created_at"`
 }
 
+func newUserResponse(user db.User) userResponse {
+	return userResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
+}
+
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -58,14 +68,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		return
 	}
 
-	rsp := userResponse{
-		Username:          user.Username,
-		FullName:          user.FullName,
-		Email:             user.Email,
-		PasswordChangedAt: user.PasswordChangedAt,
-		CreatedAt:         user.CreatedAt,
-	}
-
+	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, rsp)
 }
 
